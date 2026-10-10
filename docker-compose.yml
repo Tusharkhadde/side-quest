@@ -1,10 +1,10 @@
-# Side Quest + a local Ollama serving Gemma. Everything stays on this machine.
+# Side Quest with hosted open models (default):
+#   GOOGLE_API_KEY=... docker compose up -d        # http://localhost:3000
 #
-#   docker compose up -d
+# Optional self-host profile: the same open weights on your own machine via Ollama.
+#   LLM_PROVIDERS=ollama docker compose --profile ollama up -d
 #   docker compose exec ollama ollama pull gemma3n:e4b   # writes quests
-#   docker compose exec ollama ollama pull gemma4:e4b    # checks photos (vision)
-#   open http://localhost:3000
-#
+#   docker compose exec ollama ollama pull gemma4:e4b    # checks photos
 # GPU: uncomment the deploy block under `ollama` (NVIDIA Container Toolkit required).
 
 services:
@@ -13,17 +13,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      LLM_PROVIDER: ollama
+      LLM_PROVIDERS: ${LLM_PROVIDERS:-gemma-google,do-gradient,demo}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GEMMA_MODEL: ${GEMMA_MODEL:-gemma-4-26b-a4b-it}
+      DO_MODEL_ACCESS_KEY: ${DO_MODEL_ACCESS_KEY:-}
+      DO_MODEL: ${DO_MODEL:-gemma-4-31B-it}
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3n:e4b}
       OLLAMA_VISION_MODEL: ${OLLAMA_VISION_MODEL:-gemma4:e4b}
       DEMO_MODE: ${DEMO_MODE:-0}
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
-    depends_on:
-      - ollama
     restart: unless-stopped
 
   ollama:
+    profiles: ["ollama"]
     image: ollama/ollama:latest
     ports:
       - "11434:11434"
