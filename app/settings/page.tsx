@@ -4,18 +4,8 @@ import { useEffect, useState } from "react";
 import { Button, Card, Pill, Shell, cx } from "@/components/ui";
 import { DEFAULT_SETTINGS, loadSettings, saveActive, saveSettings, type Settings } from "@/lib/client/settings";
 import { clearEverything } from "@/lib/client/db";
-
-interface Health {
-  provider: string;
-  model: string;
-  visionModel: string;
-  demo: boolean;
-  reachable: boolean;
-  modelInstalled?: boolean;
-  visionInstalled?: boolean;
-  overrideAllowed: boolean;
-  elevenlabs: boolean;
-}
+import { useHealth, type ProviderStatus } from "@/lib/client/useHealth";
+import type { ProviderId } from "@/lib/llm/types";
 
 function Segmented<T extends string | number>({ value, options, onChange, format }: { value: T; options: T[]; onChange: (v: T) => void; format?: (v: T) => string }) {
   return (
@@ -24,7 +14,8 @@ function Segmented<T extends string | number>({ value, options, onChange, format
         <button
           key={String(o)}
           onClick={() => onChange(o)}
-          className={cx("flex-1 rounded-full py-2 text-sm font-semibold transition", o === value ? "bg-white text-moss-900 shadow" : "text-bark-600")}
+          aria-pressed={o === value}
+          className={cx("min-h-[2.5rem] flex-1 rounded-full px-1 py-2 text-sm font-semibold transition", o === value ? "bg-white text-moss-900 shadow" : "text-bark-600")}
         >
           {format ? format(o) : String(o)}
         </button>
@@ -35,18 +26,23 @@ function Segmented<T extends string | number>({ value, options, onChange, format
 
 const input = "mt-1 w-full rounded-2xl border border-bark-200 bg-white px-4 py-3 text-moss-900 outline-none focus:border-moss-500";
 
+const KEY_HINT: Record<string, string> = {
+  "gemma-google": "Set GOOGLE_API_KEY (free from Google AI Studio) to use Gemma.",
+  "do-gradient": "Set DO_MODEL_ACCESS_KEY to use open models on DigitalOcean.",
+  openai: "Set LLM_BASE_URL to use your own OpenAI-compatible server.",
+  ollama: "Set OLLAMA_URL to your Ollama server."
+};
+
+const SHORT: Record<string, string> = { auto: "Auto", "gemma-google": "Gemma", "do-gradient": "DO", openai: "Custom", ollama: "Ollama", demo: "Demo" };
+
 export default function SettingsPage() {
   const [s, setS] = useState<Settings>(DEFAULT_SETTINGS);
-  const [health, setHealth] = useState<Health | null>(null);
+  const health = useHealth();
   const [saved, setSaved] = useState(false);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     setS(loadSettings());
-    fetch("/api/health")
-      .then((r) => r.json())
-      .then(setHealth)
-      .catch(() => setHealth(null));
   }, []);
 
   function update(patch: Partial<Settings>) {
@@ -78,7 +74,7 @@ export default function SettingsPage() {
     setS(DEFAULT_SETTINGS);
   }
 
-  const m = s.model;
+  const configured = health ? health.chain.filter((p) => p.configured).map((p) => p.id as ProviderId) : [];
 
   return (
     <Shell>
@@ -97,6 +93,56 @@ export default function SettingsPage() {
       </Card>
 
       <Card className="mt-4">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-semibold text-moss-900">Open models</p>
+          {health && (
+            <Pill tone={health.primary && health.primary.id !== "demo" ? "moss" : "ember"}>
+              {health.demo ? "Demo mode" : health.primary && health.primary.id !== "demo" ? "Ready" : "Demo model only"}
+            </Pill>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-bark-600">Tried in this order. If one fails or times out, the next one answers. Keys live on the server, never in this browser.</p>
+        {health === undefined && <p className="mt-3 text-sm text-bark-600">Checking…</p>}
+        {health === null && <p className="mt-3 text-sm text-ember-600">Could not reach the server.</p>}
+        {health && (
+          <ol className="mt-3 space-y-2">
+            {health.chain.map((p: ProviderStatus, i: number) => (
+              <li key={p.id} className={cx("rounded-2xl p-3 ring-1", p.configured ? "bg-white ring-bark-200/60" : "bg-bark-50 ring-bark-100")}>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold text-moss-900">
+                    {i + 1}. {p.service}
+                  </p>
+                  <Pill tone={p.configured ? "moss" : "bark"}>{p.configured ? "on" : "off"}</Pill>
+                </div>
+                {p.configured ? (
+                  <p className="mt-1 text-xs text-bark-600">
+                    Quests: <span className="font-medium text-moss-800">{p.modelLabel}</span>
+                    {" · "}Photos: <span className="font-medium text-moss-800">{p.visionLabel ?? "not supported"}</span>
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-bark-500">{KEY_HINT[p.id] ?? "Not configured on the server."}</p>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+        {health && configured.length > 1 && (
+          <div className="mt-4 border-t border-bark-100 pt-4">
+            <p className="text-sm font-semibold text-moss-900">Try first, from this device</p>
+            <Segmented
+              value={(s.prefer && configured.includes(s.prefer) ? s.prefer : "auto") as string}
+              options={["auto", ...configured]}
+              onChange={(v) => update({ prefer: v === "auto" ? null : (v as ProviderId) })}
+              format={(v) => SHORT[v] ?? v}
+            />
+          </div>
+        )}
+        <p className="mt-4 text-xs leading-relaxed text-bark-500">
+          The weights are open, so self-hosting is one env var: <span className="font-mono">LLM_PROVIDERS=ollama</span>, or an OpenAI-compatible server on your own GPU.
+        </p>
+      </Card>
+
+      <Card className="mt-4">
         <p className="font-semibold text-moss-900">Home area</p>
         <p className="text-sm text-bark-600">Used when GPS is off. Stored only on this device.</p>
         <label className="mt-3 block text-sm text-bark-700">
@@ -106,11 +152,31 @@ export default function SettingsPage() {
         <div className="mt-2 grid grid-cols-2 gap-2">
           <label className="text-sm text-bark-700">
             Latitude
-            <input className={input} inputMode="decimal" value={s.homeArea?.lat ?? ""} onChange={(e) => update({ homeArea: { label: s.homeArea?.label ?? "Home", lon: s.homeArea?.lon ?? 0, lat: Number(e.target.value) } })} />
+            <input
+              className={input}
+              inputMode="decimal"
+              key={`lat-${s.homeArea?.lat ?? ""}`}
+              defaultValue={s.homeArea?.lat || ""}
+              placeholder="18.52"
+              onBlur={(e) => {
+                const v = parseFloat(e.target.value);
+                if (Number.isFinite(v) && Math.abs(v) <= 90) update({ homeArea: { label: s.homeArea?.label ?? "Home", lon: s.homeArea?.lon ?? 0, lat: v } });
+              }}
+            />
           </label>
           <label className="text-sm text-bark-700">
             Longitude
-            <input className={input} inputMode="decimal" value={s.homeArea?.lon ?? ""} onChange={(e) => update({ homeArea: { label: s.homeArea?.label ?? "Home", lat: s.homeArea?.lat ?? 0, lon: Number(e.target.value) } })} />
+            <input
+              className={input}
+              inputMode="decimal"
+              key={`lon-${s.homeArea?.lon ?? ""}`}
+              defaultValue={s.homeArea?.lon || ""}
+              placeholder="73.86"
+              onBlur={(e) => {
+                const v = parseFloat(e.target.value);
+                if (Number.isFinite(v) && Math.abs(v) <= 180) update({ homeArea: { label: s.homeArea?.label ?? "Home", lat: s.homeArea?.lat ?? 0, lon: v } });
+              }}
+            />
           </label>
         </div>
         <Button variant="ghost" className="mt-3 w-full" onClick={useHere} disabled={locating}>
@@ -131,69 +197,13 @@ export default function SettingsPage() {
         )}
       </Card>
 
-      <Card className="mt-4">
-        <div className="flex items-center justify-between">
-          <p className="font-semibold text-moss-900">Model</p>
-          {health && <Pill tone={health.reachable ? "moss" : "ember"}>{health.demo ? "Demo mode" : health.reachable ? "Connected" : "Not reachable"}</Pill>}
-        </div>
-        {health ? (
-          <div className="mt-2 space-y-1 text-sm text-bark-700">
-            <p>
-              Server default: <span className="font-mono">{health.provider}</span> · quests <span className="font-mono">{health.model}</span>
-              {health.modelInstalled === false && <span className="text-ember-600"> (not pulled)</span>}
-            </p>
-            <p>
-              Photo checks: <span className="font-mono">{health.visionModel}</span>
-              {health.visionInstalled === false && <span className="text-ember-600"> (not pulled)</span>}
-            </p>
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-bark-600">Checking…</p>
-        )}
-
-        {health?.overrideAllowed ? (
-          <div className="mt-4 border-t border-bark-100 pt-4">
-            <p className="text-sm font-semibold text-moss-900">Use a different endpoint from this device</p>
-            <Segmented
-              value={m?.provider ?? "server"}
-              options={["server", "ollama", "openai", "mock"]}
-              onChange={(v) => update({ model: v === "server" ? null : { provider: v as "ollama" | "openai" | "mock", url: m?.url, model: m?.model, visionModel: m?.visionModel, apiKey: m?.apiKey } })}
-              format={(v) => ({ server: "Default", ollama: "Ollama", openai: "OpenAI-compat", mock: "Mock" })[v]}
-            />
-            {m && m.provider !== "mock" && (
-              <div className="mt-3 space-y-2">
-                <label className="block text-sm text-bark-700">
-                  Base URL
-                  <input className={input} placeholder={m.provider === "ollama" ? "http://localhost:11434" : "http://your-droplet:8000/v1"} value={m.url ?? ""} onChange={(e) => update({ model: { ...m, url: e.target.value || undefined } })} />
-                </label>
-                <label className="block text-sm text-bark-700">
-                  Quest model
-                  <input className={input} placeholder="gemma3n:e4b" value={m.model ?? ""} onChange={(e) => update({ model: { ...m, model: e.target.value || undefined } })} />
-                </label>
-                <label className="block text-sm text-bark-700">
-                  Vision model
-                  <input className={input} placeholder="gemma4:e4b" value={m.visionModel ?? ""} onChange={(e) => update({ model: { ...m, visionModel: e.target.value || undefined } })} />
-                </label>
-                {m.provider === "openai" && (
-                  <label className="block text-sm text-bark-700">
-                    API key (stored on this device)
-                    <input className={input} type="password" value={m.apiKey ?? ""} onChange={(e) => update({ model: { ...m, apiKey: e.target.value || undefined } })} />
-                  </label>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="mt-3 text-sm text-bark-600">This server uses its configured model. Set ALLOW_MODEL_OVERRIDE=1 to choose from here.</p>
-        )}
-      </Card>
-
       <Card className="mt-4 bg-moss-50">
         <p className="font-semibold text-moss-900">What stays on this device</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-moss-800">
-          <li>Your screen time, journal and photos (IndexedDB in this browser).</li>
-          <li>Your exact location. Weather and park lookups get a point rounded to about 1 km.</li>
-          <li>The model sees place names, weather and a small copy of your proof photo, on the model server you choose.</li>
+          <li>Your screen-time history, journal and photos (IndexedDB in this browser). The server only ever hears &quot;N minutes on screen&quot;.</li>
+          <li>Your exact location. Weather and park lookups get a point rounded to about 1 km; distances to parks are rounded to 250 m.</li>
+          <li>The model sees place names, a weather summary and, if you ask for a check, a 768 px copy of your proof photo. The server stores none of it.</li>
+          <li>Each quest has a &quot;What left your device&quot; panel listing every request it made.</li>
         </ul>
         <Button variant="ghost" className="mt-4 w-full border-ember-500/40 text-ember-600" onClick={() => void wipe()}>
           Delete all my data
