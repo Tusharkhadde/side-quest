@@ -1,7 +1,8 @@
 import type { LatLon, Place, Quest, QuestContext, QuestDraft } from "../types";
 import { QuestDraftSchema } from "../types";
 import type { LLMProvider } from "../llm/types";
-import { generateStructured } from "../llm/json";
+import { ChainError, generateWithFallback } from "../llm/chain";
+import { modelLabel } from "../llm/labels";
 import { homePlace, pickCandidates } from "../context/places";
 import { weatherSummary } from "../context/weather";
 import { buildQuestPrompt, QUEST_SYSTEM } from "./prompts";
@@ -47,32 +48,48 @@ export function fallbackDraft(ctx: QuestContext): QuestDraft {
 export interface RunQuestOptions {
   /** ctx.places must already be the candidate list (see buildCandidates). */
   ctx: QuestContext;
-  provider: LLMProvider;
+  /** Open models to try, in order (see resolveChain). */
+  providers: LLMProvider[];
+  timeoutMs?: number;
   now?: Date;
   id?: string;
 }
 
 /**
  * The agent loop's model step: context in, one validated quest out.
- * The rules (weather, daylight, distance) are decided in code before Gemma
- * is asked; Gemma chooses the place and writes the quest; zod checks it and
- * feeds errors back for a retry; a hand-written quest is the last resort.
+ * The rules (weather, daylight, distance) are decided in code before the
+ * model is asked; the model chooses the place and writes the quest; zod
+ * checks it and feeds errors back for a retry; if one open model fails the
+ * next one in the chain is tried; a hand-written quest is the last resort.
  */
-export async function runQuestAgent({ ctx, provider, now = new Date(), id }: RunQuestOptions): Promise<Quest> {
+export async function runQuestAgent({ ctx, providers, timeoutMs, now = new Date(), id }: RunQuestOptions): Promise<Quest> {
   if (!ctx.places.length) throw new Error("runQuestAgent needs at least one candidate place");
   let draft: QuestDraft;
   let source: Quest["source"] = "model";
   let note: string | undefined;
+  let modelUsed: Quest["modelUsed"];
+  let calls: Quest["calls"] = [];
   try {
-    const res = await generateStructured(provider, questSchemaFor(ctx), {
-      system: QUEST_SYSTEM,
-      prompt: buildQuestPrompt(ctx, ctx.places)
-    });
+    const res = await generateWithFallback(
+      providers,
+      questSchemaFor(ctx),
+      { system: QUEST_SYSTEM, prompt: buildQuestPrompt(ctx, ctx.places) },
+      { timeoutMs }
+    );
     draft = res.data;
-    if (res.attempts > 1) note = `Model needed ${res.attempts} tries to produce valid JSON.`;
+    calls = res.calls;
+    modelUsed = {
+      provider: res.provider.id,
+      service: res.provider.service,
+      host: res.provider.host,
+      model: res.model,
+      label: modelLabel(res.model)
+    };
+    if (res.attempts > 1) note = `The model needed ${res.attempts} tries to produce valid JSON.`;
   } catch (e) {
     draft = fallbackDraft(ctx);
     source = "fallback";
+    calls = e instanceof ChainError ? e.calls : [];
     note = e instanceof Error ? e.message : String(e);
   }
   const place = ctx.places.find((p) => p.id === draft.placeId) ?? ctx.places[0];
@@ -87,7 +104,9 @@ export async function runQuestAgent({ ctx, provider, now = new Date(), id }: Run
     createdAt: now.toISOString(),
     conditions: ctx.conditions,
     weatherSummary: weatherSummary(ctx.weather),
-    model: source === "model" ? provider.model : "built-in quest",
+    model: modelUsed ? modelUsed.label : "built-in quest",
+    ...(modelUsed ? { modelUsed } : {}),
+    calls,
     source,
     ...(note ? { note } : {})
   };
