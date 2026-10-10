@@ -1,71 +1,91 @@
-import type { CompletionRequest, LLMProvider } from "./types";
-import { LLMError } from "./types";
+import type { CompletionRequest, LLMProvider, ProviderId } from "./types";
+import { LLMError, hostOf, httpError } from "./types";
 
 type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 
+export interface OpenAICompatibleOptions {
+  id?: Extract<ProviderId, "do-gradient" | "openai" | "ollama">;
+  service?: string;
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+}
+
 /**
- * Any OpenAI-compatible chat endpoint serving Gemma: vLLM, llama.cpp server,
- * LM Studio, a DigitalOcean GPU Droplet, or DigitalOcean Gradient.
+ * Any OpenAI-compatible /chat/completions endpoint serving an open-weight model:
+ * DigitalOcean serverless inference, OpenRouter, Groq, Hugging Face, or vLLM /
+ * llama.cpp / Ollama on your own GPU Droplet.
  */
 export class OpenAICompatibleProvider implements LLMProvider {
-  readonly name = "openai" as const;
+  readonly id: Extract<ProviderId, "do-gradient" | "openai" | "ollama">;
+  readonly service: string;
+  readonly host: string;
+  private readonly fetchImpl: typeof fetch;
+  private readonly timeoutMs: number;
+  private jsonMode = true;
+
   constructor(
     readonly baseUrl: string,
-    readonly apiKey: string | undefined,
+    private readonly apiKey: string | undefined,
     readonly model: string,
-    readonly visionModel: string,
-    private fetchImpl: typeof fetch = fetch,
-    private timeoutMs = 120_000
-  ) {}
-
-  private post(body: Record<string, unknown>): Promise<Response> {
-    return this.fetchImpl(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {})
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(this.timeoutMs)
-    });
+    readonly visionModel: string | null,
+    opts: OpenAICompatibleOptions = {}
+  ) {
+    this.id = opts.id ?? "openai";
+    this.service = opts.service ?? "OpenAI-compatible server";
+    this.host = hostOf(baseUrl);
+    this.fetchImpl = opts.fetchImpl ?? fetch;
+    this.timeoutMs = opts.timeoutMs ?? 30_000;
   }
 
-  async complete(req: CompletionRequest): Promise<string> {
-    const hasImages = Boolean(req.images?.length);
+  buildBody(req: CompletionRequest): Record<string, unknown> {
+    const images = req.images ?? [];
+    const hasImages = images.length > 0;
     const userContent: string | Part[] = hasImages
       ? [
-          ...(req.images ?? []).map<Part>((b64) => ({
-            type: "image_url",
-            image_url: { url: `data:image/jpeg;base64,${b64}` }
-          })),
-          { type: "text", text: req.prompt }
+          { type: "text", text: req.prompt },
+          ...images.map<Part>((b64) => ({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${b64}` } }))
         ]
       : req.prompt;
-    const body: Record<string, unknown> = {
+    return {
       model: hasImages ? this.visionModel : this.model,
       temperature: req.temperature ?? 0.8,
+      max_completion_tokens: 1024,
       messages: [
         { role: "system", content: req.system },
         { role: "user", content: userContent }
       ],
-      response_format: { type: "json_object" }
+      ...(this.jsonMode ? { response_format: { type: "json_object" } } : {})
     };
-    let res: Response;
+  }
+
+  private async post(body: Record<string, unknown>): Promise<Response> {
     try {
-      res = await this.post(body);
-      // Some servers do not implement response_format; retry once without it.
-      if (res.status === 400) {
-        delete body.response_format;
-        res = await this.post(body);
-      }
+      return await this.fetchImpl(`${this.baseUrl.replace(/\/$/, "")}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {})
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(this.timeoutMs)
+      });
     } catch (e) {
-      throw new LLMError(`Could not reach the model server at ${this.baseUrl}`, e);
+      throw new LLMError(`Could not reach ${this.service} at ${this.host}`, e);
     }
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new LLMError(`Model server returned ${res.status}: ${text.slice(0, 200)}`);
+  }
+
+  async complete(req: CompletionRequest): Promise<string> {
+    if (req.images?.length && !this.visionModel) throw new LLMError(`${this.service} has no vision model configured`);
+    let res = await this.post(this.buildBody(req));
+    // Some servers do not implement response_format; retry once without it and remember.
+    if (res.status === 400 && this.jsonMode) {
+      this.jsonMode = false;
+      res = await this.post(this.buildBody(req));
     }
-    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    return json.choices?.[0]?.message?.content ?? "";
+    if (!res.ok) throw await httpError(this.service, res);
+    const json = (await res.json()) as { choices?: { message?: { content?: string | null } }[] };
+    const text = json.choices?.[0]?.message?.content ?? "";
+    if (!text.trim()) throw new LLMError(`${this.service} returned an empty reply`);
+    return text;
   }
 }
