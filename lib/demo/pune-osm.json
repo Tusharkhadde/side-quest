@@ -1,0 +1,327 @@
+{
+ "attribution": "Data © OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright",
+ "snapshot": "2026-05-31T22:37:00Z",
+ "query": "named leisure=park|garden|nature_reserve, natural=water|wood, tourism=viewpoint within 1.8 km of 18.51,73.85 (Pune), via Overpass API",
+ "elements": [
+  {
+   "type": "node",
+   "id": 11610747750,
+   "tags": {
+    "name": "Vaze Talim",
+    "leisure": "park"
+   },
+   "lat": 18.5117357,
+   "lon": 73.8512506
+  },
+  {
+   "type": "way",
+   "id": 217773610,
+   "tags": {
+    "name": "Maharana Pratap Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5081955,
+    "lon": 73.8532058
+   }
+  },
+  {
+   "type": "way",
+   "id": 210718055,
+   "tags": {
+    "name": "Vijayanagar Colony Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5050655,
+    "lon": 73.8514752
+   }
+  },
+  {
+   "type": "way",
+   "id": 219767496,
+   "tags": {
+    "name": "Chhatrapati Shivaji Maharaj Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5044744,
+    "lon": 73.8530783
+   }
+  },
+  {
+   "type": "node",
+   "id": 10172979846,
+   "tags": {
+    "name": "Sanas Ground",
+    "leisure": "park"
+   },
+   "lat": 18.5032073,
+   "lon": 73.8531065
+  },
+  {
+   "type": "way",
+   "id": 207872445,
+   "tags": {
+    "name": "Peshve Udyan Lake",
+    "natural": "water"
+   },
+   "center": {
+    "lat": 18.5024504,
+    "lon": 73.8515227
+   }
+  },
+  {
+   "type": "way",
+   "id": 220562868,
+   "tags": {
+    "name": "Garware Balbhavan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5024623,
+    "lon": 73.8541088
+   }
+  },
+  {
+   "type": "node",
+   "id": 10172979853,
+   "tags": {
+    "name": "Talaee Ground",
+    "leisure": "park"
+   },
+   "lat": 18.5072436,
+   "lon": 73.860316
+  },
+  {
+   "type": "way",
+   "id": 215535662,
+   "tags": {
+    "name": "V. D. Vartak Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5186426,
+    "lon": 73.8478053
+   }
+  },
+  {
+   "type": "way",
+   "id": 217271099,
+   "tags": {
+    "name": "Jijamata Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5187255,
+    "lon": 73.8568786
+   }
+  },
+  {
+   "type": "node",
+   "id": 10172979852,
+   "tags": {
+    "name": "Epiphany School Ground",
+    "leisure": "park"
+   },
+   "lat": 18.5058172,
+   "lon": 73.8604136
+  },
+  {
+   "type": "way",
+   "id": 197954183,
+   "tags": {
+    "name": "Peshve Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5013401,
+    "lon": 73.8515349
+   }
+  },
+  {
+   "type": "node",
+   "id": 10172979851,
+   "tags": {
+    "name": "St. Hildas Schoole Ground",
+    "leisure": "park"
+   },
+   "lat": 18.5054856,
+   "lon": 73.860934
+  },
+  {
+   "type": "way",
+   "id": 53272975,
+   "tags": {
+    "name": "Sarasbaug",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5008294,
+    "lon": 73.8528092
+   }
+  },
+  {
+   "type": "node",
+   "id": 5682056653,
+   "tags": {
+    "name": "NG park",
+    "leisure": "park"
+   },
+   "lat": 18.5170485,
+   "lon": 73.8607572
+  },
+  {
+   "type": "way",
+   "id": 199261924,
+   "tags": {
+    "name": "Sambhaji Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5205613,
+    "lon": 73.8471253
+   }
+  },
+  {
+   "type": "node",
+   "id": 7944584962,
+   "tags": {
+    "name": "Sambhaji Park",
+    "leisure": "park"
+   },
+   "lat": 18.5206664,
+   "lon": 73.8472146
+  },
+  {
+   "type": "way",
+   "id": 631747389,
+   "tags": {
+    "name": "Swami Samarth Park",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5112636,
+    "lon": 73.8639142
+   }
+  },
+  {
+   "type": "way",
+   "id": 220562882,
+   "tags": {
+    "name": "Ramchandra Keshav Taware Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.4985652,
+    "lon": 73.8544261
+   }
+  },
+  {
+   "type": "way",
+   "id": 940925672,
+   "tags": {
+    "name": "Vijaya Kailas Tikone Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5227813,
+    "lon": 73.8570969
+   }
+  },
+  {
+   "type": "way",
+   "id": 208958216,
+   "tags": {
+    "name": "Sachin Tendulkar Jogging Park",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5043187,
+    "lon": 73.8403288
+   }
+  },
+  {
+   "type": "way",
+   "id": 218881240,
+   "tags": {
+    "name": "Shrimant Bhairavsingh Ghorpade Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5020235,
+    "lon": 73.8622855
+   }
+  },
+  {
+   "type": "node",
+   "id": 2081486315,
+   "tags": {
+    "name": "Parvati",
+    "tourism": "viewpoint"
+   },
+   "lat": 18.4977735,
+   "lon": 73.8471143
+  },
+  {
+   "type": "way",
+   "id": 331532100,
+   "tags": {
+    "name": "Madar Teresa Garden",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5021403,
+    "lon": 73.8377894
+   }
+  },
+  {
+   "type": "way",
+   "id": 208180364,
+   "tags": {
+    "name": "Fergusson College Botanical Garden",
+    "leisure": "garden"
+   },
+   "center": {
+    "lat": 18.5236663,
+    "lon": 73.840739
+   }
+  },
+  {
+   "type": "way",
+   "id": 1030015753,
+   "tags": {
+    "name": "Kamala Nehru Park",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5169871,
+    "lon": 73.8348138
+   }
+  },
+  {
+   "type": "way",
+   "id": 208958215,
+   "tags": {
+    "name": "Raja Mantri Udyan",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5063032,
+    "lon": 73.8332994
+   }
+  },
+  {
+   "type": "way",
+   "id": 149110279,
+   "tags": {
+    "name": "Symbi Hill",
+    "leisure": "park"
+   },
+   "center": {
+    "lat": 18.5236923,
+    "lon": 73.8337877
+   }
+  }
+ ]
+}
