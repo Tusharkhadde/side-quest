@@ -74,15 +74,51 @@ export interface QuestContext {
   screenMinutes: number;
 }
 
+/** One hop in the open-model fallback chain. Never contains keys or payloads. */
+export interface ModelCall {
+  provider: string;
+  service: string;
+  host: string;
+  model: string;
+  ok: boolean;
+  ms: number;
+  tries?: number;
+  error?: string;
+}
+
+/** Which open model actually answered, for the "written by" credit. */
+export interface ModelUsed {
+  provider: string;
+  service: string;
+  host: string;
+  model: string;
+  /** Human name, e.g. "Gemma 4 26B A4B". */
+  label: string;
+}
+
+/** One line of the "what left your device" panel. */
+export interface DisclosureItem {
+  to: string;
+  what: string;
+  why: string;
+}
+
 export interface Quest extends QuestDraft {
   id: string;
   createdAt: string;
   place: Place;
   conditions: Conditions;
   weatherSummary: string;
+  /** Human label of the model that wrote it ("Gemma 4 26B A4B"), or "built-in quest". */
   model: string;
+  modelUsed?: ModelUsed;
+  calls?: ModelCall[];
   source: "model" | "fallback";
   note?: string;
+  /** Sample city and weather, no location used. */
+  demo?: boolean;
+  /** Filled in on the device: every network request this quest made, and what it carried. */
+  disclosure?: DisclosureItem[];
 }
 
 export type QuestStatus = "offered" | "accepted" | "declined" | "completed" | "abandoned";
@@ -95,7 +131,7 @@ export interface JournalEntry {
   startedAt?: string;
   finishedAt?: string;
   minutesOutside?: number;
-  verdict?: Verdict & { checkedBy: "model" | "self" };
+  verdict?: Verdict & { checkedBy: "model" | "self"; model?: string };
   photoId?: string;
   hour: number;
   weekday: number;
