@@ -1,8 +1,8 @@
-# DigitalOcean App Platform spec.
+# DigitalOcean App Platform spec (primary deploy).
 #   doctl apps create --spec .do/app.yaml
-# App Platform runs the web app; Gemma runs on a GPU Droplet (see README,
-# "Deploy: DigitalOcean"). Set LLM_BASE_URL to the Droplet's OpenAI-compatible
-# endpoint, e.g. http://<droplet-private-ip>:11434/v1 for Ollama or :8000/v1 for vLLM.
+# Or use the "Deploy to DigitalOcean" button in the README (.do/deploy.template.yaml).
+# Models are hosted: Gemma on Google's Gemini API first, then open models on
+# DigitalOcean serverless inference, then the built-in demo model. No GPU needed here.
 name: side-quest
 region: blr
 services:
@@ -18,19 +18,27 @@ services:
     health_check:
       http_path: /api/health
     envs:
-      - key: LLM_PROVIDER
-        value: openai
-      - key: LLM_BASE_URL
-        value: http://REPLACE_WITH_DROPLET_IP:11434/v1
-      - key: LLM_MODEL
-        value: gemma3n:e4b
-      - key: LLM_VISION_MODEL
-        value: gemma4:e4b
-      - key: LLM_API_KEY
+      - key: LLM_PROVIDERS
+        scope: RUN_TIME
+        value: gemma-google,do-gradient,demo
+      - key: GOOGLE_API_KEY
+        scope: RUN_TIME
         type: SECRET
         value: ""
+      - key: GEMMA_MODEL
+        scope: RUN_TIME
+        value: gemma-4-26b-a4b-it
+      - key: DO_MODEL_ACCESS_KEY
+        scope: RUN_TIME
+        type: SECRET
+        value: ""
+      - key: DO_MODEL
+        scope: RUN_TIME
+        value: gemma-4-31B-it
+      - key: DO_VISION_MODEL
+        scope: RUN_TIME
+        value: nemotron-nano-12b-v2-vl
       - key: ELEVENLABS_API_KEY
+        scope: RUN_TIME
         type: SECRET
         value: ""
-      - key: DEMO_MODE
-        value: "0"
