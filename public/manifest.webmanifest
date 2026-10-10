@@ -1,0 +1,19 @@
+{
+  "name": "Side Quest",
+  "short_name": "Side Quest",
+  "description": "Turn screen time into a 20-minute outdoor quest. Local-first, powered by Gemma.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f5f0",
+  "theme_color": "#3a502a",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [{ "name": "Give me a quest", "url": "/quest?new=1" }]
+}
