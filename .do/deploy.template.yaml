@@ -1,0 +1,33 @@
+# Used by the "Deploy to DigitalOcean" button in the README.
+# App Platform asks for the secret values when you create the app.
+spec:
+  name: side-quest
+  services:
+    - name: web
+      git:
+        branch: main
+        repo_clone_url: https://github.com/Tusharkhadde/side-quest.git
+      dockerfile_path: Dockerfile
+      http_port: 3000
+      instance_size_slug: apps-s-1vcpu-1gb
+      instance_count: 1
+      health_check:
+        http_path: /api/health
+      envs:
+        - key: LLM_PROVIDERS
+          scope: RUN_TIME
+          value: gemma-google,do-gradient,demo
+        - key: GOOGLE_API_KEY
+          scope: RUN_TIME
+          type: SECRET
+          value: "paste-your-google-ai-studio-key"
+        - key: DO_MODEL_ACCESS_KEY
+          scope: RUN_TIME
+          type: SECRET
+          value: "optional-do-model-access-key"
+        - key: GEMMA_MODEL
+          scope: RUN_TIME
+          value: gemma-4-26b-a4b-it
+        - key: DO_MODEL
+          scope: RUN_TIME
+          value: gemma-4-31B-it
