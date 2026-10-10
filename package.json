@@ -2,7 +2,7 @@
   "name": "side-quest",
   "version": "0.1.0",
   "private": true,
-  "description": "A local-first Gemma agent that turns screen time into a 20-minute outdoor quest.",
+  "description": "An open-model agent (Gemma) that turns a long screen session into a 20-minute outdoor quest.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
