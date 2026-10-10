@@ -80,13 +80,13 @@ export function Shell({ children, hideNav = false }: { children: ReactNode; hide
   );
 }
 
-export function Ring({ value, max, children }: { value: number; max: number; children?: ReactNode }) {
+export function Ring({ value, max, children, size = "md" }: { value: number; max: number; children?: ReactNode; size?: "sm" | "md" }) {
   const r = 88;
   const c = 2 * Math.PI * r;
   const pct = Math.min(1, value / Math.max(1, max));
   const over = value >= max;
   return (
-    <div className="relative mx-auto h-56 w-56">
+    <div className={cx("relative mx-auto", size === "sm" ? "h-44 w-44" : "h-56 w-56")}>
       <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
         <circle cx="100" cy="100" r={r} fill="none" strokeWidth="14" className="stroke-bark-100" />
         <circle
@@ -123,4 +123,56 @@ export function Stamp({ title, date, pass = true }: { title: string; date: strin
       <p className="mt-2 text-center font-display text-xl text-moss-900">{title}</p>
     </div>
   );
+}
+
+/** "Quest written by Gemma 4 26B A4B" with where it ran. Judges and users both like to see this. */
+export function ModelCredit({ verb, label, service, open = true }: { verb: string; label: string; service?: string; open?: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-xs text-bark-600">
+      <span>
+        {verb} <span className="font-semibold text-moss-800">{label}</span>
+      </span>
+      {open && <span className="rounded-full bg-moss-100 px-2 py-0.5 font-medium text-moss-700">open weights</span>}
+      {service && <span className="text-bark-500">via {service}</span>}
+    </div>
+  );
+}
+
+export interface DisclosureLine {
+  to: string;
+  what: string;
+  why: string;
+}
+
+/** The per-request "what left your device" panel. */
+export function DisclosurePanel({ items, stayed, title = "What left your device" }: { items: DisclosureLine[]; stayed?: string[]; title?: string }) {
+  return (
+    <details className="group rounded-3xl bg-white/60 p-4 ring-1 ring-bark-200/60 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-moss-900">
+        <span>🔒 {title}</span>
+        <span className="text-bark-500 transition group-open:rotate-180" aria-hidden>
+          ▾
+        </span>
+      </summary>
+      <ol className="mt-3 space-y-3">
+        {items.map((it, i) => (
+          <li key={i} className="border-l-2 border-moss-200 pl-3 text-sm">
+            <p className="font-semibold text-moss-900 [overflow-wrap:anywhere]">→ {it.to}</p>
+            <p className="text-bark-700">{it.what}</p>
+            <p className="text-xs text-bark-500">{it.why}</p>
+          </li>
+        ))}
+      </ol>
+      {stayed && stayed.length > 0 && (
+        <div className="mt-4 rounded-2xl bg-moss-50 p-3 text-sm text-moss-800">
+          <p className="font-semibold">Stayed on this phone</p>
+          <p className="mt-0.5">{stayed.join(" · ")}</p>
+        </div>
+      )}
+    </details>
+  );
+}
+
+export function Spinner({ className }: { className?: string }) {
+  return <span className={cx("inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-r-transparent", className)} aria-hidden />;
 }
