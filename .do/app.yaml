@@ -1,0 +1,36 @@
+# DigitalOcean App Platform spec.
+#   doctl apps create --spec .do/app.yaml
+# App Platform runs the web app; Gemma runs on a GPU Droplet (see README,
+# "Deploy: DigitalOcean"). Set LLM_BASE_URL to the Droplet's OpenAI-compatible
+# endpoint, e.g. http://<droplet-private-ip>:11434/v1 for Ollama or :8000/v1 for vLLM.
+name: side-quest
+region: blr
+services:
+  - name: web
+    github:
+      repo: Tusharkhadde/side-quest
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: Dockerfile
+    http_port: 3000
+    instance_size_slug: apps-s-1vcpu-1gb
+    instance_count: 1
+    health_check:
+      http_path: /api/health
+    envs:
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_BASE_URL
+        value: http://REPLACE_WITH_DROPLET_IP:11434/v1
+      - key: LLM_MODEL
+        value: gemma3n:e4b
+      - key: LLM_VISION_MODEL
+        value: gemma4:e4b
+      - key: LLM_API_KEY
+        type: SECRET
+        value: ""
+      - key: ELEVENLABS_API_KEY
+        type: SECRET
+        value: ""
+      - key: DEMO_MODE
+        value: "0"
