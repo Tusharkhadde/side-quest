@@ -1,6 +1,6 @@
 "use client";
 
-import type { ModelOverride } from "../llm";
+import type { ProviderId } from "../llm/types";
 import type { Quest } from "../types";
 
 export interface HomeArea {
@@ -15,8 +15,8 @@ export interface Settings {
   searchRadiusM: number;
   voice: "device" | "elevenlabs";
   homeArea: HomeArea | null;
-  /** null = use whatever the server is configured with. */
-  model: ModelOverride | null;
+  /** Which of the server's configured open models to try first. null = server order. */
+  prefer: ProviderId | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   searchRadiusM: 1500,
   voice: "device",
   homeArea: null,
-  model: null
+  prefer: null
 };
 
 const KEY = "sq.settings";
