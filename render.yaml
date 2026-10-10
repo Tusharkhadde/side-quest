@@ -1,0 +1,24 @@
+# Render Blueprint. Render has no GPUs, so point the app at a model server you
+# run elsewhere (a DigitalOcean GPU Droplet, your own machine via a tunnel), or
+# deploy in demo mode to show the flow with the built-in mock model.
+services:
+  - type: web
+    name: side-quest
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_BASE_URL
+        sync: false # e.g. http://<droplet-ip>:8000/v1 or https://<ollama-host>/v1
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: google/gemma-3n-E4B-it
+      - key: LLM_VISION_MODEL
+        sync: false
+      - key: DEMO_MODE
+        value: "0"
+      - key: ELEVENLABS_API_KEY
+        sync: false
