@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f8f5f0;
+  color: #27351f;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 15% -10%, rgba(163, 187, 134, 0.35), transparent 45%),
+    radial-gradient(circle at 110% 20%, rgba(159, 203, 224, 0.3), transparent 40%);
+  background-attachment: fixed;
+  min-height: 100dvh;
+}
+
+@keyframes stamp {
+  0% {
+    transform: scale(1.8) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.95) rotate(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-6deg);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+@layer utilities {
+  .animate-stamp {
+    animation: stamp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+  .animate-breathe {
+    animation: breathe 5s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-stamp,
+  .animate-breathe {
+    animation: none;
+  }
+}
