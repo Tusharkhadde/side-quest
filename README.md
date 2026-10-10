@@ -20,7 +20,7 @@ An agent built on open-weight models. <b>Gemma</b> writes the quest and checks y
 | --- | --- | --- | --- | --- | --- |
 | <img src="docs/screenshots/01-home.png" width="150" /> | <img src="docs/screenshots/02-quest.png" width="150" /> | <img src="docs/screenshots/03-what-left-your-device.png" width="150" /> | <img src="docs/screenshots/04b-voice-step.png" width="150" /> | <img src="docs/screenshots/06-stamp.png" width="150" /> | <img src="docs/screenshots/07-journal.png" width="150" /> |
 
-<sub>Captured at 390×844 with `scripts/screenshots.mjs` in demo mode (built-in demo model, sample Pune data), so the quest text comes from the hand-written bank, not Gemma. More in [`docs/screenshots/`](docs/screenshots).</sub>
+<sub>Captured at 390×844 with `scripts/screenshots.mjs` in demo mode (built-in demo model, sample Pune data), so the quest text comes from the hand-written bank, not Gemma, and the "proof photo" is the app icon standing in for a real one. More in [`docs/screenshots/`](docs/screenshots).</sub>
 
 ## Quickstart (2 minutes, no GPU, no Ollama)
 
