@@ -1,7 +1,8 @@
-import type { Verdict } from "../types";
+import type { ModelCall, ModelUsed, Verdict } from "../types";
 import { VerdictSchema } from "../types";
 import type { LLMProvider } from "../llm/types";
-import { generateStructured } from "../llm/json";
+import { generateWithFallback } from "../llm/chain";
+import { modelLabel } from "../llm/labels";
 import { buildVerifyPrompt, VERIFY_SYSTEM } from "./prompts";
 
 export interface VerifyInput {
@@ -11,10 +12,16 @@ export interface VerifyInput {
   questTitle: string;
 }
 
-/** Ask Gemma's vision model whether the photo shows what the quest asked for. */
-export async function verifyPhoto(provider: LLMProvider, input: VerifyInput): Promise<Verdict> {
-  const { data } = await generateStructured(
-    provider,
+export interface VerifyResult {
+  verdict: Verdict;
+  modelUsed: ModelUsed;
+  calls: ModelCall[];
+}
+
+/** Ask an open vision model (Gemma by default) whether the photo shows what the quest asked for. */
+export async function verifyPhoto(providers: LLMProvider[], input: VerifyInput, timeoutMs?: number): Promise<VerifyResult> {
+  const res = await generateWithFallback(
+    providers,
     VerdictSchema,
     {
       system: VERIFY_SYSTEM,
@@ -22,9 +29,13 @@ export async function verifyPhoto(provider: LLMProvider, input: VerifyInput): Pr
       images: [input.imageBase64],
       temperature: 0.2
     },
-    2
+    { maxAttempts: 2, timeoutMs }
   );
-  return data;
+  return {
+    verdict: res.data,
+    calls: res.calls,
+    modelUsed: { provider: res.provider.id, service: res.provider.service, host: res.provider.host, model: res.model, label: modelLabel(res.model) }
+  };
 }
 
 export function stripDataUrl(s: string): string {
