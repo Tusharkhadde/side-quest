@@ -11,14 +11,16 @@ interface QuestPromptContext {
 }
 
 /**
- * A deterministic stand-in for Gemma. It reads the same prompt the real model
+ * A deterministic stand-in for a real model. It reads the same prompt the real model
  * gets and answers with a hand-written quest, so the full agent loop, schema
  * validation and UI can run in tests and demos without a GPU.
  */
 export class MockProvider implements LLMProvider {
-  readonly name = "mock" as const;
-  readonly model = "mock-gemma";
-  readonly visionModel = "mock-gemma-vision";
+  readonly id = "demo" as const;
+  readonly service = "Built-in demo model (no network)";
+  readonly host = "this server";
+  readonly model = "side-quest-demo";
+  readonly visionModel = "side-quest-demo";
 
   async complete(req: CompletionRequest): Promise<string> {
     if (req.system.includes("TASK=verify")) return this.verify(req);
