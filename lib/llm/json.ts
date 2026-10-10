@@ -2,14 +2,28 @@ import type { ZodType, ZodTypeDef } from "zod";
 import type { CompletionRequest, LLMProvider } from "./types";
 import { LLMError } from "./types";
 
-/** Pull the first JSON object out of a model reply (handles ``` fences and chatter). */
+/** Small, safe fixes for the ways open models usually break JSON. */
+export function repairJson(s: string): string {
+  return s
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"') // smart double quotes
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/^\s*\/\/.*$/gm, "") // whole-line // comments
+    .replace(/,\s*([}\]])/g, "$1"); // trailing commas
+}
+
+/** Pull the first JSON object out of a model reply (handles ``` fences, chatter and minor damage). */
 export function extractJson(text: string): unknown {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const body = fenced ? fenced[1] : text;
   const start = body.indexOf("{");
   const end = body.lastIndexOf("}");
   if (start === -1 || end <= start) throw new Error("no JSON object in reply");
-  return JSON.parse(body.slice(start, end + 1));
+  const slice = body.slice(start, end + 1);
+  try {
+    return JSON.parse(slice);
+  } catch {
+    return JSON.parse(repairJson(slice));
+  }
 }
 
 export interface StructuredResult<T> {
@@ -20,6 +34,8 @@ export interface StructuredResult<T> {
 /**
  * Ask for JSON, validate it with zod, and on failure send the validation
  * errors back to the model so it can repair its own answer.
+ * Network/HTTP errors are not retried here: they bubble up so the provider
+ * chain can move on to the next open model.
  */
 export async function generateStructured<T>(
   provider: LLMProvider,
