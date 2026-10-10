@@ -127,14 +127,12 @@ export default function Journal() {
             <Card key={e.id} className="flex gap-4 p-4">
               <Thumb id={e.photoId} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="truncate font-semibold text-moss-900">{e.quest.title}</p>
-                  <div className="flex shrink-0 gap-1">
-                    {e.quest.demo && <Pill tone="ember">demo</Pill>}
-                    <Pill tone={STATUS_TONE[e.status]}>{e.status}</Pill>
-                  </div>
+                <p className="line-clamp-2 font-semibold leading-snug text-moss-900">{e.quest.title}</p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <Pill tone={STATUS_TONE[e.status]}>{e.status}</Pill>
+                  {e.quest.demo && <Pill tone="ember">demo</Pill>}
                 </div>
-                <p className="truncate text-sm text-bark-600">
+                <p className="mt-1 truncate text-sm text-bark-600">
                   {e.quest.place.name} · {new Date(e.offeredAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   {e.minutesOutside ? ` · ${e.minutesOutside} min` : ""}
                 </p>
