@@ -1,0 +1,12 @@
+{
+  "elements": [
+    { "type": "way", "id": 101, "center": { "lat": 18.6312, "lon": 73.8021 }, "tags": { "leisure": "park", "name": "Shahu Udyan" } },
+    { "type": "node", "id": 102, "lat": 18.6318, "lon": 73.8025, "tags": { "leisure": "park", "name": "Shahu Udyan" } },
+    { "type": "way", "id": 103, "center": { "lat": 18.6355, "lon": 73.7990 }, "tags": { "leisure": "garden", "name:en": "Rose Garden", "name": "गुलाब उद्यान" } },
+    { "type": "way", "id": 104, "center": { "lat": 18.6250, "lon": 73.8060 }, "tags": { "natural": "water", "name": "Pavana Ghat" } },
+    { "type": "way", "id": 105, "center": { "lat": 18.6301, "lon": 73.8001 }, "tags": { "leisure": "park" } },
+    { "type": "way", "id": 106, "tags": { "leisure": "park", "name": "No Geometry Park" } },
+    { "type": "way", "id": 107, "center": { "lat": 18.7000, "lon": 73.9000 }, "tags": { "leisure": "nature_reserve", "name": "Far Hills" } },
+    { "type": "way", "id": 108, "center": { "lat": 18.6330, "lon": 73.8040 }, "tags": { "highway": "footway", "name": "Riverside Walk" } }
+  ]
+}
