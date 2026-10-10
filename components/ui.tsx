@@ -28,7 +28,9 @@ export function Button({
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("rounded-4xl bg-white/80 p-6 shadow-sm ring-1 ring-bark-200/60", className)}>{children}</div>;
+  // Tailwind emits p-6 after p-0/p-4/p-5, so only add the default padding when the caller sets none.
+  const padded = /(^|\s)p-\d/.test(className ?? "");
+  return <div className={cx("rounded-4xl bg-white/80 shadow-sm ring-1 ring-bark-200/60", !padded && "p-6", className)}>{children}</div>;
 }
 
 export function Pill({ children, tone = "moss" }: { children: ReactNode; tone?: "moss" | "sky" | "ember" | "bark" }) {
