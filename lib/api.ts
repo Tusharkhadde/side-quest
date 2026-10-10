@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { ModelOverrideSchema } from "./llm";
+import { PROVIDER_IDS } from "./llm/types";
+
+/** A preference among the open models the server has configured. Never a URL or a key. */
+export const ModelPreferenceSchema = z.enum(PROVIDER_IDS);
 
 /** Request bodies for the app's own API routes, shared by client and server. */
 
@@ -33,7 +36,8 @@ export const QuestRequestSchema = z.object({
   questMinutes: z.number().int().min(5).max(60),
   localTime: z.string().regex(/^\d{2}:\d{2}$/),
   screenMinutes: z.number().int().min(0).max(24 * 60),
-  override: ModelOverrideSchema.nullish()
+  prefer: ModelPreferenceSchema.nullish(),
+  demo: z.boolean().optional()
 });
 export type QuestRequest = z.infer<typeof QuestRequestSchema>;
 
@@ -41,7 +45,7 @@ export const VerifyRequestSchema = z.object({
   imageBase64: z.string().min(16).max(6_000_000),
   proof: z.string().min(3).max(200),
   questTitle: z.string().min(1).max(80),
-  override: ModelOverrideSchema.nullish()
+  prefer: ModelPreferenceSchema.nullish()
 });
 export type VerifyRequest = z.infer<typeof VerifyRequestSchema>;
 
