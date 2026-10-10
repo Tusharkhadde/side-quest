@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button, Card, Pill, Shell } from "@/components/ui";
 import { getPhoto, listEntries } from "@/lib/client/db";
@@ -57,7 +58,27 @@ export default function Journal() {
       <p className="text-sm font-medium uppercase tracking-[0.2em] text-moss-600">Journal</p>
       <h1 className="mt-2 font-display text-4xl text-moss-900">Time well spent</h1>
 
-      {stats && (
+      {entries === null && <div className="mt-6 h-40 animate-pulse rounded-4xl bg-white/50" />}
+
+      {entries && entries.length === 0 && (
+        <Card className="mt-6 text-center">
+          <p className="text-4xl" aria-hidden>
+            🌿
+          </p>
+          <p className="mt-2 font-display text-2xl text-moss-900">No quests yet</p>
+          <p className="mt-1 text-bark-600">Finished quests land here with their photo stamp. Everything stays on this phone.</p>
+          <div className="mt-5 flex flex-col gap-3">
+            <Link href="/quest?new=1" className="inline-flex min-h-[3.25rem] items-center justify-center rounded-full bg-moss-700 px-6 text-lg font-semibold text-moss-50">
+              Give me a quest
+            </Link>
+            <Link href="/quest?new=1&demo=1" className="inline-flex min-h-[3.25rem] items-center justify-center rounded-full border-2 border-moss-700/20 px-6 text-lg font-semibold text-moss-800">
+              Try a demo quest
+            </Link>
+          </div>
+        </Card>
+      )}
+
+      {stats && entries && entries.length > 0 && (
         <div className="mt-6 grid grid-cols-2 gap-3">
           {[
             { v: stats.completed, l: "quests finished" },
@@ -73,7 +94,7 @@ export default function Journal() {
         </div>
       )}
 
-      {best && (
+      {best && entries && entries.length > 0 && (
         <Card className="mt-6">
           <div className="flex items-center justify-between">
             <p className="font-semibold text-moss-900">When you say yes</p>
@@ -100,9 +121,6 @@ export default function Journal() {
       )}
 
       <div className="mt-8 space-y-3">
-        {entries?.length === 0 && (
-          <p className="text-center text-bark-600">No quests yet. Your first one is a tap away.</p>
-        )}
         {entries
           ?.filter((e) => e.status !== "offered")
           .map((e) => (
@@ -111,13 +129,20 @@ export default function Journal() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <p className="truncate font-semibold text-moss-900">{e.quest.title}</p>
-                  <Pill tone={STATUS_TONE[e.status]}>{e.status}</Pill>
+                  <div className="flex shrink-0 gap-1">
+                    {e.quest.demo && <Pill tone="ember">demo</Pill>}
+                    <Pill tone={STATUS_TONE[e.status]}>{e.status}</Pill>
+                  </div>
                 </div>
                 <p className="truncate text-sm text-bark-600">
                   {e.quest.place.name} · {new Date(e.offeredAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                   {e.minutesOutside ? ` · ${e.minutesOutside} min` : ""}
                 </p>
                 {e.verdict && <p className="mt-1 line-clamp-2 text-sm text-moss-800">{e.verdict.comment}</p>}
+                <p className="mt-1 text-xs text-bark-500">
+                  Written by {e.quest.model}
+                  {e.verdict?.model ? ` · checked by ${e.verdict.model}` : e.verdict?.checkedBy === "self" ? " · self-checked" : ""}
+                </p>
               </div>
             </Card>
           ))}
