@@ -114,7 +114,7 @@ export default function VoiceMode() {
       }}
       className="fixed inset-0 z-50 flex select-none flex-col items-center justify-center bg-night text-moss-200 outline-none"
     >
-      <div className="absolute top-[max(1.5rem,env(safe-area-inset-top))] text-sm tracking-[0.3em] text-white/25">
+      <div className="absolute top-[max(1.5rem,env(safe-area-inset-top))] text-sm tracking-[0.3em] text-white/40">
         {phase === "ready" ? "VOICE MODE" : phase === "proof" ? "PROOF" : `${index + 1} / ${active.quest.steps.length}`}
         {remaining !== null && phase !== "ready" ? ` · ${remaining} MIN` : ""}
       </div>
@@ -123,9 +123,9 @@ export default function VoiceMode() {
         <span className="text-lg font-medium text-white/50">{phase === "ready" ? "Begin" : phase === "proof" ? "Camera" : "Next"}</span>
       </div>
 
-      {(showText || phase === "ready") && <p className="mt-10 max-w-xs px-6 text-center text-lg leading-relaxed text-white/45">{currentText}</p>}
+      {(showText || phase === "ready") && <p className="mt-10 max-w-xs px-6 text-center text-lg leading-relaxed text-white/60">{currentText}</p>}
 
-      <div className="absolute inset-x-0 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex justify-between px-6 text-sm text-white/30">
+      <div className="absolute inset-x-0 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex justify-between px-6 text-sm text-white/55">
         <button
           onClick={(e) => {
             e.stopPropagation();
