@@ -1,7 +1,7 @@
 import type { Conditions, Place, QuestContext } from "../types";
 import { weatherSummary } from "../context/weather";
 
-export const QUEST_SYSTEM = `You are Side Quest, a calm, kind outdoor guide that runs on the user's own device. TASK=quest.
+export const QUEST_SYSTEM = `You are Side Quest, a calm, kind outdoor guide. TASK=quest.
 Someone has been staring at a screen for a long time. Turn that into one short, real-world quest that gets them outside and paying attention to the world.
 
 Rules:
@@ -37,7 +37,7 @@ export function candidateForPrompt(p: Place) {
   return { id: p.id, name: p.name, type: p.kind, walkMinutes: p.walkMinutes, distanceMeters: p.distanceMeters };
 }
 
-/** Everything Gemma sees. Note: no coordinates, no screen history, just a summary. */
+/** Everything the model sees. Note: no coordinates, no screen history, just a summary. */
 export function buildQuestPrompt(ctx: QuestContext, candidates: Place[]): string {
   const context = {
     localTime: ctx.localTime,
