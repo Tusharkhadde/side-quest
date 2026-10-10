@@ -1,6 +1,7 @@
-# Render Blueprint. Render has no GPUs, so point the app at a model server you
-# run elsewhere (a DigitalOcean GPU Droplet, your own machine via a tunnel), or
-# deploy in demo mode to show the flow with the built-in mock model.
+# Render Blueprint (alternative to DigitalOcean App Platform).
+# Models are hosted, so no GPU is needed: set GOOGLE_API_KEY for Gemma, and
+# optionally DO_MODEL_ACCESS_KEY as a fallback. With neither, the built-in
+# demo model answers.
 services:
   - type: web
     name: side-quest
@@ -8,17 +9,15 @@ services:
     plan: starter
     healthCheckPath: /api/health
     envVars:
-      - key: LLM_PROVIDER
-        value: openai
-      - key: LLM_BASE_URL
-        sync: false # e.g. http://<droplet-ip>:8000/v1 or https://<ollama-host>/v1
-      - key: LLM_API_KEY
+      - key: LLM_PROVIDERS
+        value: gemma-google,do-gradient,demo
+      - key: GOOGLE_API_KEY
         sync: false
-      - key: LLM_MODEL
-        value: google/gemma-3n-E4B-it
-      - key: LLM_VISION_MODEL
+      - key: GEMMA_MODEL
+        value: gemma-4-26b-a4b-it
+      - key: DO_MODEL_ACCESS_KEY
         sync: false
-      - key: DEMO_MODE
-        value: "0"
+      - key: DO_MODEL
+        value: gemma-4-31B-it
       - key: ELEVENLABS_API_KEY
         sync: false
