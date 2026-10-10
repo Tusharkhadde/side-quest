@@ -1,0 +1,16 @@
+{
+  "name": "side-quest-watch",
+  "version": "0.1.0",
+  "description": "Tiny desktop watcher for Side Quest: notices long screen streaks and opens a quest. No dependencies.",
+  "license": "MIT",
+  "bin": {
+    "side-quest-watch": "bin/side-quest-watch.js"
+  },
+  "files": ["bin", "lib.js"],
+  "scripts": {
+    "test": "node --test lib.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
