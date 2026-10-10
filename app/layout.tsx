@@ -4,7 +4,7 @@ import { ClientBoot } from "@/components/ClientBoot";
 
 export const metadata: Metadata = {
   title: "Side Quest",
-  description: "A local-first Gemma agent that turns screen time into a 20-minute outdoor quest.",
+  description: "An open-model agent (Gemma) that turns a long screen session into a 20-minute outdoor quest.",
   manifest: "/manifest.webmanifest",
   applicationName: "Side Quest",
   appleWebApp: { capable: true, title: "Side Quest", statusBarStyle: "default" },
